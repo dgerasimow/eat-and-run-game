@@ -28,14 +28,15 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        ViewManager vm = new ViewManager();
+        ViewManager vm = new ViewManager(primaryStage);
         initContent();
 
-        Scene scene = new Scene(Parent root);
+        Scene scene = new Scene(appRoot);
         scene.setOnKeyPressed(event -> keys.put(event.getCode(), true));
         scene.setOnKeyReleased(event -> keys.put(event.getCode(), false));
+        primaryStage.setResizable(false);
         primaryStage.setTitle("Eat&Run");
-        primaryStage.setScene(vm.);
+        primaryStage.setScene(vm.getMenuScene());
         primaryStage.show();
 
 

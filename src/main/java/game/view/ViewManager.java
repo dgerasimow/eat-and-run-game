@@ -3,11 +3,8 @@ package game.view;
 import game.model.GameButton;
 import game.model.GameSubscene;
 import javafx.event.ActionEvent;
-import javafx.event.Event;
 import javafx.event.EventHandler;
-import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -22,18 +19,18 @@ public class ViewManager {
     public static final int HEIGHT = 800;
     public static final int WIDTH = 1024;
     private AnchorPane mainPane;
-    private Scene mainScene;
-    private Stage mainStage;
+    private Scene menuScene;
+    private Stage rootStage;
+
 
     List<GameButton> menuButtons;
 
     private GameSubscene infoSubScene;
 
-    public ViewManager() {
+    public ViewManager(Stage rootStage) {
+        this.rootStage = rootStage;
         this.mainPane = new AnchorPane();
-        this.mainScene = new Scene(mainPane, WIDTH, HEIGHT);
-        this.mainStage = new Stage();
-        mainStage.setScene(mainScene);
+        this.menuScene = new Scene(mainPane, WIDTH, HEIGHT);
         menuButtons = new ArrayList<>();
         //TODO: needs to be researched
 //        createSubScenes();
@@ -49,8 +46,8 @@ public class ViewManager {
         mainPane.getChildren().add(infoSubScene);
     }
 
-    public Stage getMainStage() {
-        return mainStage;
+    public Scene getMenuScene() {
+        return menuScene;
     }
 
     private void createButtons() {
@@ -68,7 +65,7 @@ public class ViewManager {
             @Override
             public void handle(ActionEvent actionEvent) {
                 GameViewManager gameViewManager = new GameViewManager();
-                gameViewManager.createGame(mainStage);
+                rootStage.setScene(gameViewManager.getGameScene());
             }
         });
     }
