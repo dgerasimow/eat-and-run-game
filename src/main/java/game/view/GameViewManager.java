@@ -3,16 +3,26 @@ package game.view;
 
 import game.GameController;
 import game.data.LevelData;
+import game.model.GameLabel;
 import game.view.models.Player;
 import javafx.animation.AnimationTimer;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
+import javafx.util.Duration;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -27,14 +37,22 @@ public class GameViewManager {
     private Pane gamePane;
     private ArrayList<Node> platforms = new ArrayList<>();
     private Player player;
+    private GameLabel timer;
+    private GameLabel firstPlayerName;
+    private GameLabel secondPlayerName;
+    private GameLabel firstPlayerScores;
+    private GameLabel secondPlayerScores;
+
 
 
     public GameViewManager() {
         initGameContent();
-        GameController game = new GameController();
+        GameController gameController = new GameController(gamePane,platforms, player);
+        gameController.startGame();
+
     }
     private void initGameContent() {
-        gamePane = new AnchorPane();
+        gamePane = new Pane();
         gameScene = new Scene(gamePane, 1024, 800);
         gameScene.setOnKeyPressed(event -> keys.put(event.getCode(), true));
         gameScene.setOnKeyReleased(event -> keys.put(event.getCode(), false));
@@ -43,10 +61,9 @@ public class GameViewManager {
         gamePane.setBackground(new Background(background));
         player = new Player(createEntity(300, 200, 40, 40, Color.AQUAMARINE));
 
-
         createMap(LevelData.MAP_1);
-
-        createFoodEntities();
+        createTimer();
+        createScores();
 
         AnimationTimer timer = new AnimationTimer() {
             @Override
@@ -57,6 +74,20 @@ public class GameViewManager {
         timer.start();
     }
 
+    private void createTimer() {
+        timer = new GameLabel("0.00", 60);
+        timer.setTranslateX(460);
+        timer.setTranslateY(0);
+
+        gamePane.getChildren().add(timer);
+    }
+
+    private void createScores() {
+        firstPlayerScores = new GameLabel("0", 60);
+        firstPlayerScores.setTranslateX(200);
+        firstPlayerScores.setTranslateY(0);
+
+    }
     private void createMap (String[] mapData) {
         for (int i = 0; i < mapData.length; i++) {
             String line = mapData[i];
@@ -102,21 +133,6 @@ public class GameViewManager {
 
         gamePane.getChildren().add(entity);
         return entity;
-    }
-
-    public ArrayList<Node> createFoodEntities() {
-        ArrayList<Node> foodEntities = new ArrayList<>();
-        for(Node platform : platforms) {
-            if (platform.getTranslateX() > 0 && platform.getTranslateY() > 0
-                    && platform.getTranslateX() < 1024 && platform.getTranslateY() < 800) {
-                if (Math.random() < 0.5) {
-                    Node food = createEntity((int) platform.getTranslateX(), (int) platform.getTranslateY() - 60, 20,20, Color.YELLOW);
-                    foodEntities.add(food);
-                }
-
-            }
-        }
-        return foodEntities;
     }
 
     public Scene getGameScene() {

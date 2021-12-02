@@ -1,7 +1,6 @@
 package game.view;
 
 import game.model.GameButton;
-import game.model.GameSubscene;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
@@ -25,7 +24,7 @@ public class ViewManager {
 
     List<GameButton> menuButtons;
 
-    private GameSubscene infoSubScene;
+
 
     public ViewManager(Stage rootStage) {
         this.rootStage = rootStage;
@@ -41,10 +40,7 @@ public class ViewManager {
 
 
     }
-    private void createSubScenes() {
-        infoSubScene = new GameSubscene();
-        mainPane.getChildren().add(infoSubScene);
-    }
+
 
     public Scene getMenuScene() {
         return menuScene;
