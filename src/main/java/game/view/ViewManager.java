@@ -60,7 +60,7 @@ public class ViewManager {
         newGameButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-                GameViewManager gameViewManager = new GameViewManager();
+                GameViewManager gameViewManager = new GameViewManager(rootStage);
                 rootStage.setScene(gameViewManager.getGameScene());
             }
         });

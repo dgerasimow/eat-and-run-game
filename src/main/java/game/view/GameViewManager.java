@@ -19,6 +19,7 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.io.FileInputStream;
@@ -32,8 +33,8 @@ public class GameViewManager {
     //TODO: refactor this shit
 
     private HashMap<KeyCode, Boolean> keys = new HashMap<>();
-
     private Scene gameScene;
+    private Stage rootStage;
     private Pane gamePane;
     private ArrayList<Node> platforms = new ArrayList<>();
     private Player player;
@@ -45,9 +46,10 @@ public class GameViewManager {
 
 
 
-    public GameViewManager() {
+
+    public GameViewManager(Stage rootStage) {
         initGameContent();
-        GameController gameController = new GameController(gamePane,platforms, player);
+        GameController gameController = new GameController(gamePane,platforms, player, timer, firstPlayerScores, keys, gameScene);
         gameController.startGame();
 
     }
@@ -65,27 +67,23 @@ public class GameViewManager {
         createTimer();
         createScores();
 
-        AnimationTimer timer = new AnimationTimer() {
-            @Override
-            public void handle(long l) {
-                update();
-            }
-        };
-        timer.start();
     }
 
     private void createTimer() {
         timer = new GameLabel("0.00", 60);
         timer.setTranslateX(460);
         timer.setTranslateY(0);
+        timer.setText("02.00");
 
         gamePane.getChildren().add(timer);
     }
 
     private void createScores() {
         firstPlayerScores = new GameLabel("0", 60);
-        firstPlayerScores.setTranslateX(200);
+        firstPlayerScores.setTranslateX(350);
         firstPlayerScores.setTranslateY(0);
+
+        gamePane.getChildren().add(firstPlayerScores);
 
     }
     private void createMap (String[] mapData) {
@@ -104,26 +102,7 @@ public class GameViewManager {
         }
 
     }
-    private void update() {
-        if (isPressed(KeyCode.W) && player.getPlayerNode().getTranslateY() >= 5) {
-            player.jumpPlayer();
-        }
-        if (isPressed(KeyCode.A) && player.getPlayerNode().getTranslateX() >= 5) {
-            player.movePlayerX(-5, platforms);
-        }
-        if (isPressed(KeyCode.D) && player.getPlayerNode().getTranslateX() >= 5 ) {
-            player.movePlayerX(5, platforms);
-        }
-        if (player.getPlayerVelocity().getY() < 10) {
-            player.setPlayerVelocity(player.getPlayerVelocity().add(0, 1));
-        }
 
-        player.movePlayerY((int) player.getPlayerVelocity().getY(), platforms);
-    }
-
-    private boolean isPressed(KeyCode key) {
-        return keys.getOrDefault(key, false);
-    }
 
     private Node createEntity(int x, int y, int w, int h, Color color) {
         Rectangle entity = new Rectangle(w, h);
