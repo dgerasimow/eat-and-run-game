@@ -32,7 +32,7 @@ public class GameController {
     private int playerScore;
     private Label timerLabel;
     private Label firstPlayerScores;
-    private int[] time = {3};
+    private int[] time = {120};
     private boolean isTimeIsUp = false;
     private EndGameSubscene endGameSubscene;
     private Scene gameScene;
@@ -47,8 +47,9 @@ public class GameController {
         endGameSubscene = new EndGameSubscene();
         this.keys = keys;
         this.gameScene = gameScene;
-
     }
+
+
 
     public void startGame() {
         setGameTimer();
@@ -102,7 +103,7 @@ public class GameController {
                             time[0]--;
                         }
                 ));
-        gameTimer.setCycleCount(4);
+        gameTimer.setCycleCount(121);
         gameTimer.play();
     }
 

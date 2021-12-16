@@ -9,11 +9,13 @@ public class Player {
     private Point2D playerVelocity;
     private boolean canJump;
     private Node playerNode;
+    private String name;
 
-    public Player(Node playerNode) {
+    public Player(Node playerNode, String name) {
         playerVelocity = new Point2D(0,0);
         canJump = true;
         this.playerNode =  playerNode;
+        this.name = name;
     }
 
     public void jumpPlayer() {

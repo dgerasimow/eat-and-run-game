@@ -20,6 +20,7 @@ public class ViewManager {
     private AnchorPane mainPane;
     private Scene menuScene;
     private Stage rootStage;
+    private GameViewManager gm;
 
 
     List<GameButton> menuButtons;
@@ -60,8 +61,8 @@ public class ViewManager {
         newGameButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-                GameViewManager gameViewManager = new GameViewManager(rootStage);
-                rootStage.setScene(gameViewManager.getGameScene());
+                gm = GameViewManager.getGm();
+                rootStage.setScene(gm.getGameScene());
             }
         });
     }

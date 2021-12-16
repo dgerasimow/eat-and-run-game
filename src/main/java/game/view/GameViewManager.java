@@ -1,9 +1,12 @@
 package game.view;
 
 
+import com.google.gson.Gson;
 import game.GameController;
+import game.client.PlayerClient;
 import game.data.LevelData;
 import game.model.GameLabel;
+import game.view.models.EnemyPlayer;
 import game.view.models.Player;
 import javafx.animation.AnimationTimer;
 import javafx.animation.KeyFrame;
@@ -24,6 +27,7 @@ import javafx.util.Duration;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -38,22 +42,32 @@ public class GameViewManager {
     private Pane gamePane;
     private ArrayList<Node> platforms = new ArrayList<>();
     private Player player;
+    private EnemyPlayer enemy;
     private GameLabel timer;
     private GameLabel firstPlayerName;
     private GameLabel secondPlayerName;
     private GameLabel firstPlayerScores;
     private GameLabel secondPlayerScores;
+    private static GameViewManager gm = new GameViewManager();
+    private PlayerClient client;
 
+    public static GameViewManager getGm() {
+        return gm;
+    }
 
-
-
-    public GameViewManager(Stage rootStage) {
+    public GameViewManager() {
         initGameContent();
         GameController gameController = new GameController(gamePane,platforms, player, timer, firstPlayerScores, keys, gameScene);
         gameController.startGame();
-
     }
-    private void initGameContent() {
+    private void initGameContent(){
+        client = new PlayerClient(this);
+        try {
+            client.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         gamePane = new Pane();
         gameScene = new Scene(gamePane, 1024, 800);
         gameScene.setOnKeyPressed(event -> keys.put(event.getCode(), true));
@@ -61,12 +75,16 @@ public class GameViewManager {
         Image bg = new Image("background_main_menu.png", 1024,800, false, true);
         BackgroundImage background = new BackgroundImage(bg, BackgroundRepeat.REPEAT, BackgroundRepeat.REPEAT, BackgroundPosition.DEFAULT, null);
         gamePane.setBackground(new Background(background));
-        player = new Player(createEntity(300, 200, 40, 40, Color.AQUAMARINE));
-
+        player = new Player(createEntity(300, 200, 40, 40, Color.AQUAMARINE),"Johnny");
         createMap(LevelData.MAP_1);
         createTimer();
         createScores();
 
+        Gson gson = new Gson();
+        HashMap<String,String> message = new HashMap<>();
+        message.put("method", "new");
+        message.put("parameter","Johnny");
+        client.sendMessage(gson.toJson(message) + "\n");
     }
 
     private void createTimer() {
@@ -118,4 +136,7 @@ public class GameViewManager {
         return gameScene;
     }
 
+    public void createEnemy() {
+        enemy = new EnemyPlayer(createEntity(500, 200, 40, 40, Color.RED), "Ivan");
+    }
 }
