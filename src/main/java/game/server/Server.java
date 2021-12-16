@@ -6,11 +6,12 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Server {
     private static final int PORT = 5555;
     private ServerSocket socket;
-    private final List<ServerThread> clients = new ArrayList<>();
+    private final CopyOnWriteArrayList<ServerThread> clients = new CopyOnWriteArrayList<>();
 
 
     public void start() throws IOException {

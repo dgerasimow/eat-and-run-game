@@ -136,7 +136,11 @@ public class GameViewManager {
         return gameScene;
     }
 
-    public void createEnemy() {
-        enemy = new EnemyPlayer(createEntity(500, 200, 40, 40, Color.RED), "Ivan");
+    public synchronized void createEnemy() {
+        if (enemy == null) {
+            javafx.application.Platform.runLater(() -> {
+                enemy = new EnemyPlayer(createEntity(500, 200, 40, 40, Color.RED), "Ivan");
+            });
+        }
     }
 }
