@@ -2,31 +2,21 @@ package game.view;
 
 
 import com.google.gson.Gson;
-import game.GameController;
+import game.HostGameController;
 import game.client.PlayerClient;
 import game.data.LevelData;
 import game.model.GameLabel;
 import game.view.models.EnemyPlayer;
 import game.view.models.Player;
-import javafx.animation.AnimationTimer;
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.text.Font;
 import javafx.stage.Stage;
-import javafx.util.Duration;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -50,6 +40,7 @@ public class GameViewManager {
     private GameLabel secondPlayerScores;
     private static GameViewManager gm = new GameViewManager();
     private PlayerClient client;
+    private HostGameController hostGameController;
 
     public static GameViewManager getGm() {
         return gm;
@@ -57,8 +48,8 @@ public class GameViewManager {
 
     public GameViewManager() {
         initGameContent();
-        GameController gameController = new GameController(gamePane,platforms, player, timer, firstPlayerScores, keys, gameScene);
-        gameController.startGame();
+        hostGameController = new HostGameController(gamePane,platforms, player, timer, firstPlayerScores, keys, gameScene, enemy);
+        hostGameController.startGame();
     }
     private void initGameContent(){
         client = new PlayerClient(this);
@@ -139,8 +130,14 @@ public class GameViewManager {
     public synchronized void createEnemy() {
         if (enemy == null) {
             javafx.application.Platform.runLater(() -> {
+                System.out.println("created Enemy");
                 enemy = new EnemyPlayer(createEntity(500, 200, 40, 40, Color.RED), "Ivan");
+                hostGameController.setEnemy(enemy);
             });
         }
+    }
+
+    public EnemyPlayer getEnemy() {
+        return enemy;
     }
 }

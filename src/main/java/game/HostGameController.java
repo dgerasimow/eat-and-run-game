@@ -1,6 +1,7 @@
 package game;
 
 import game.model.EndGameSubscene;
+import game.view.models.EnemyPlayer;
 import game.view.models.Player;
 import javafx.animation.AnimationTimer;
 import javafx.animation.KeyFrame;
@@ -22,13 +23,14 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class GameController {
+public class HostGameController {
 
     private HashMap<KeyCode, Boolean> keys = new HashMap<>();
     private CopyOnWriteArrayList<Node> foodEntities;
     private ArrayList<Node> platforms;
     private Pane gamePane;
     private Player player;
+    private EnemyPlayer enemy;
     private int playerScore;
     private Label timerLabel;
     private Label firstPlayerScores;
@@ -36,8 +38,9 @@ public class GameController {
     private boolean isTimeIsUp = false;
     private EndGameSubscene endGameSubscene;
     private Scene gameScene;
+    private boolean isStarted = true;
 
-    public GameController (Pane gamePane, ArrayList<Node> platforms, Player player, Label timer, Label firstPlayerScores, HashMap<KeyCode, Boolean> keys, Scene gameScene) {
+    public HostGameController(Pane gamePane, ArrayList<Node> platforms, Player player, Label timer, Label firstPlayerScores, HashMap<KeyCode, Boolean> keys, Scene gameScene, EnemyPlayer enemy) {
         this.gamePane = gamePane;
         this.platforms = platforms;
         this.player = player;
@@ -47,23 +50,12 @@ public class GameController {
         endGameSubscene = new EndGameSubscene();
         this.keys = keys;
         this.gameScene = gameScene;
+        this.enemy = enemy;
     }
 
 
 
     public void startGame() {
-        setGameTimer();
-        spawnFood();
-        foodEntities = new CopyOnWriteArrayList<>();
-        System.out.println("GAME BEGINS");
-        AnimationTimer mainGameTimer = new AnimationTimer() {
-            @Override
-            public void handle(long l) {
-                eatFood();
-            }
-        };
-        mainGameTimer.start();
-
         AnimationTimer updateTimer = new AnimationTimer() {
             @Override
             public void handle(long l) {
@@ -71,19 +63,35 @@ public class GameController {
             }
         };
         updateTimer.start();
+        while (isStarted) {
+            if (enemy != null) {
+                isStarted = false;
+                setGameTimer();
+                spawnFood();
+                foodEntities = new CopyOnWriteArrayList<>();
+                System.out.println("GAME BEGINS");
+                AnimationTimer mainGameTimer = new AnimationTimer() {
+                    @Override
+                    public void handle(long l) {
+                        eatFood();
+                    }
+                };
+                mainGameTimer.start();
 
-        AnimationTimer timeTimer = new AnimationTimer() {
-            @Override
-            public void handle(long l) {
-                if (isTimeIsUp) {
-                    gameEnding();
-                    updateTimer.stop();
-                    this.stop();
-                }
+
+                AnimationTimer timeTimer = new AnimationTimer() {
+                    @Override
+                    public void handle(long l) {
+                        if (isTimeIsUp) {
+                            gameEnding();
+                            updateTimer.stop();
+                            this.stop();
+                        }
+                    }
+                };
+                timeTimer.start();
             }
-        };
-        timeTimer.start();
-
+        }
     }
 
     private void gameEnding() {
@@ -199,4 +207,7 @@ public class GameController {
         return keys.getOrDefault(key, false);
     }
 
+    public void setEnemy(EnemyPlayer enemy) {
+        this.enemy = enemy;
+    }
 }

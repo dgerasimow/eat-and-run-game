@@ -12,6 +12,8 @@ public class ServerThread implements Runnable {
 
     private final Server server;
 
+    private Boolean isTwo = false;
+
     public ServerThread(BufferedReader input, BufferedWriter output, Server server) {
         this.input = input;
         this.output = output;
@@ -37,6 +39,10 @@ public class ServerThread implements Runnable {
             while (true) {
                 String message = input.readLine();
                 server.sendMessage(message, this);
+                if (server.getClients().size() == 2 && !isTwo) {
+                    isTwo = true;
+                    server.sendCreateEnemies();
+                }
             }
         } catch (SocketException socketException) {
             server.removeClient(this);

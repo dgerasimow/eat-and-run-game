@@ -2,7 +2,6 @@ package game.client;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import game.GameController;
 import game.view.GameViewManager;
 
 import java.io.BufferedReader;
@@ -41,9 +40,8 @@ public class PlayerThread implements Runnable{
 
                 if(message != null) {
                     HashMap<String, String> serverMessage = gson.fromJson(message,new TypeToken<HashMap<String, String>>(){}.getType());
-                    System.out.println(serverMessage.get("method"));
-                    if(serverMessage.get("method").equals("new")) {
-                        System.out.println(1);
+//                    System.out.println(serverMessage.get("method"));
+                    if (serverMessage.get("method").equals("create") && gm.getEnemy() == null) {
                         gm.createEnemy();
                     }
 

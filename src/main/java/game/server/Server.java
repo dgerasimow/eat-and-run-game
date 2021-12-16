@@ -1,10 +1,13 @@
 package game.server;
 
+import com.google.gson.Gson;
+
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -24,8 +27,8 @@ public class Server {
             BufferedWriter output = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream(), StandardCharsets.UTF_8));
 
             ServerThread serverThread = new ServerThread(input, output, this);
-
             clients.add(serverThread);
+            System.out.println("Подключился новый клиент");
 
             new Thread(serverThread).start();
         }
@@ -42,6 +45,16 @@ public class Server {
         }
     }
 
+    public void sendCreateEnemies() throws IOException {
+        for (ServerThread client : clients) {
+            Gson gson = new Gson();
+            HashMap<String, String> message = new HashMap<>();
+            message.put("method", "create");
+            client.getOutput().write(gson.toJson(message) + "\n");
+            client.getOutput().flush();
+        }
+    }
+
     public void removeClient(ServerThread serverThread) {
         clients.remove(serverThread);
     }
@@ -49,5 +62,9 @@ public class Server {
     public static void main(String[] args) throws IOException {
         Server server = new Server();
         server.start();
+    }
+
+    public CopyOnWriteArrayList<ServerThread> getClients() {
+        return clients;
     }
 }
