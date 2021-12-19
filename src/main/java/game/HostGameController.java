@@ -1,7 +1,10 @@
 package game;
 
+import com.google.gson.Gson;
+import game.client.PlayerClient;
 import game.model.EndGameSubscene;
 import game.view.models.EnemyPlayer;
+import game.view.models.Food;
 import game.view.models.Player;
 import javafx.animation.AnimationTimer;
 import javafx.animation.KeyFrame;
@@ -15,7 +18,6 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
-import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.util.ArrayList;
@@ -26,75 +28,98 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class HostGameController {
 
     private HashMap<KeyCode, Boolean> keys = new HashMap<>();
-    private CopyOnWriteArrayList<Node> foodEntities;
+    private CopyOnWriteArrayList<Food> foodEntities;
     private ArrayList<Node> platforms;
     private Pane gamePane;
     private Player player;
     private EnemyPlayer enemy;
-    private int playerScore;
+    private int firstPlayerScore;
+    private int secondPlayerScore;
     private Label timerLabel;
     private Label firstPlayerScores;
-    private int[] time = {120};
+    private Label secondPlayerScores;
+    private int[] time = {3};
     private boolean isTimeIsUp = false;
     private EndGameSubscene endGameSubscene;
     private Scene gameScene;
     private boolean isStarted = true;
+    private int idCounter = 0;
+    private PlayerClient client;
+    public static final Gson gson = new Gson();
 
-    public HostGameController(Pane gamePane, ArrayList<Node> platforms, Player player, Label timer, Label firstPlayerScores, HashMap<KeyCode, Boolean> keys, Scene gameScene, EnemyPlayer enemy) {
+    public HostGameController(Pane gamePane, ArrayList<Node> platforms, Player player, Label timer, Label firstPlayerScores,
+                              HashMap<KeyCode, Boolean> keys, Scene gameScene, PlayerClient client, Label secondPlayerScores) {
         this.gamePane = gamePane;
         this.platforms = platforms;
         this.player = player;
-        playerScore = 0;
+        firstPlayerScore = 0;
         timerLabel = timer;
         this.firstPlayerScores = firstPlayerScores;
-        endGameSubscene = new EndGameSubscene();
         this.keys = keys;
         this.gameScene = gameScene;
-        this.enemy = enemy;
+        this.client = client;
+        this.secondPlayerScores = secondPlayerScores;
     }
 
 
 
     public void startGame() {
-        AnimationTimer updateTimer = new AnimationTimer() {
+        AnimationTimer gameTimer = new AnimationTimer() {
             @Override
             public void handle(long l) {
-                update();
+                System.out.println(enemy);
+                if (enemy != null) {
+                    AnimationTimer updateTimer = new AnimationTimer() {
+                        @Override
+                        public void handle(long l) {
+                            update();
+                        }
+                    };
+                    updateTimer.start();
+                    isStarted = false;
+                    setGameTimer();
+                    spawnFood();
+                    foodEntities = new CopyOnWriteArrayList<>();
+                    System.out.println("GAME BEGINS");
+                    AnimationTimer mainGameTimer = new AnimationTimer() {
+                        @Override
+                        public void handle(long l) {
+                            eatFood();
+                        }
+                    };
+                    mainGameTimer.start();
+
+
+                    AnimationTimer timeTimer = new AnimationTimer() {
+                        @Override
+                        public void handle(long l) {
+                            if (isTimeIsUp) {
+                                gameEnding(checkWinner());
+                                updateTimer.stop();
+                                this.stop();
+                            }
+                        }
+                    };
+                    timeTimer.start();
+                    this.stop();
+                }
             }
         };
-        updateTimer.start();
-        while (isStarted) {
-            if (enemy != null) {
-                isStarted = false;
-                setGameTimer();
-                spawnFood();
-                foodEntities = new CopyOnWriteArrayList<>();
-                System.out.println("GAME BEGINS");
-                AnimationTimer mainGameTimer = new AnimationTimer() {
-                    @Override
-                    public void handle(long l) {
-                        eatFood();
-                    }
-                };
-                mainGameTimer.start();
+        gameTimer.start();
+    }
 
-
-                AnimationTimer timeTimer = new AnimationTimer() {
-                    @Override
-                    public void handle(long l) {
-                        if (isTimeIsUp) {
-                            gameEnding();
-                            updateTimer.stop();
-                            this.stop();
-                        }
-                    }
-                };
-                timeTimer.start();
-            }
+    private String checkWinner() {
+        if (firstPlayerScore > secondPlayerScore) {
+            return "Host player"; //TODO: сделать никнеймы
+        } else if (firstPlayerScore == secondPlayerScore) {
+            return "Friendship";
+        } else {
+            return "Connected player";
         }
     }
 
-    private void gameEnding() {
+    private void gameEnding(String winner) {
+        endGameSubscene = new EndGameSubscene(winner);
         endGameSubscene.setLayoutX(285);
         endGameSubscene.setLayoutY(150);
         gamePane.getChildren().add(endGameSubscene);
@@ -107,11 +132,17 @@ public class HostGameController {
                         actionEvent -> {
                             int minutes = (time[0] % 3600) / 60;
                             int seconds = time[0] % 60;
-                            timerLabel.setText(String.format("%02d.%02d", minutes, seconds));
+                            String formattedString = String.format("%02d.%02d", minutes, seconds);
+                            timerLabel.setText(formattedString);
+
+                            HashMap<String,String> message = new HashMap<>();
+                            message.put("method", "updateTime");
+                            message.put("parameter",formattedString);
+                            client.sendMessage(gson.toJson(message) + "\n");
                             time[0]--;
                         }
                 ));
-        gameTimer.setCycleCount(121);
+        gameTimer.setCycleCount(4);
         gameTimer.play();
     }
 
@@ -123,9 +154,17 @@ public class HostGameController {
 
                                 @Override
                                 public void handle(ActionEvent event) {
-                                    Node food = createFoodEntitiy();
-                                    gamePane.getChildren().add(food);
+                                    Food food = createFoodEntitiy();
+                                    gamePane.getChildren().add(food.getFoodNode());
                                     foodEntities.add(food);
+
+                                    HashMap<String,String> message = new HashMap<>();
+                                    message.put("method", "newFood");
+                                    message.put("foodId", Integer.toString(food.getFoodId()));
+                                    message.put("x", Double.toString(food.getFoodNode().getTranslateX()));
+                                    message.put("y", Double.toString(food.getFoodNode().getTranslateY()));
+                                    client.sendMessage(gson.toJson(message) + "\n");
+
                                     System.out.println(foodEntities);
                                     System.out.println("ADDED NEW FOOD");
 
@@ -157,14 +196,16 @@ public class HostGameController {
         return entity;
     }
 
-    public Node createFoodEntitiy() {
+    public Food createFoodEntitiy() {
 //        CopyOnWriteArrayList<Node> foodEntities = new CopyOnWriteArrayList<>();
-        Node food = null;
+        Food food = null;
+
         for(Node platform : platforms) {
             if (platform.getTranslateX() > 0 && platform.getTranslateY() > 0
                     && platform.getTranslateX() < 920 && platform.getTranslateY() < 740) {
                 if (Math.random() < 0.5) {
-                    food = createEntityWithoutAdding((int) platform.getTranslateX() + 40, (int) platform.getTranslateY() - 20 , 20,20, Color.YELLOW);
+                    food = new Food(idCounter, createEntityWithoutAdding((int) platform.getTranslateX() + 40, (int) platform.getTranslateY() - 20 , 20,20, Color.YELLOW));
+                    idCounter++;
                     Collections.shuffle(platforms);
                     break;
                 }
@@ -175,15 +216,32 @@ public class HostGameController {
 
     private void eatFood() {
         if (foodEntities.size() != 0) {
-            for (Node food : foodEntities) {
-                if (player.getPlayerNode().getBoundsInParent().intersects(food.getBoundsInParent())) {
-                    gamePane.getChildren().remove(food);
-                    playerScore += 1;
-                    firstPlayerScores.setText(Integer.toString(playerScore));
+            for (Food food : foodEntities) {
+                if (player.getPlayerNode().getBoundsInParent().intersects(food.getFoodNode().getBoundsInParent())) {
+                    HashMap<String, String> message = new HashMap<>();
+                    message.put("method", "eat");
+                    message.put("foodId", Integer.toString(food.getFoodId()));
+                    client.sendMessage(gson.toJson(message) + "\n");
+                    gamePane.getChildren().remove(food.getFoodNode());
+                    firstPlayerScore += 1;
+                    firstPlayerScores.setText(Integer.toString(firstPlayerScore));
                     foodEntities.remove(food);
                 }
             }
         }
+    }
+
+    public synchronized void enemyEatFood(int foodId) {
+        javafx.application.Platform.runLater(() -> {
+            for (Food food : foodEntities) {
+                if (food.getFoodId() == foodId) {
+                    gamePane.getChildren().remove(food.getFoodNode());
+                    secondPlayerScore += 1;
+                    secondPlayerScores.setText(Integer.toString(secondPlayerScore));
+                    foodEntities.remove(food);
+                }
+            }
+        });
     }
 
     private void update() {
@@ -199,8 +257,13 @@ public class HostGameController {
         if (player.getPlayerVelocity().getY() < 10) {
             player.setPlayerVelocity(player.getPlayerVelocity().add(0, 1));
         }
-
         player.movePlayerY((int) player.getPlayerVelocity().getY(), platforms);
+
+        HashMap<String,String> message = new HashMap<>();
+        message.put("method", "move");
+        message.put("x", Double.toString(player.getPlayerNode().getTranslateX()));
+        message.put("y", Double.toString(player.getPlayerNode().getTranslateY()));
+        client.sendMessage(gson.toJson(message) + "\n");
     }
 
     private boolean isPressed(KeyCode key) {
@@ -209,5 +272,26 @@ public class HostGameController {
 
     public void setEnemy(EnemyPlayer enemy) {
         this.enemy = enemy;
+    }
+
+    public EnemyPlayer getEnemy() {
+        return enemy;
+    }
+
+    public synchronized void createEnemy() {
+        javafx.application.Platform.runLater(() -> {
+            if (enemy == null) {
+                    System.out.println("created Enemy");
+                    enemy = new EnemyPlayer(createEntityWithoutAdding(500, 200, 40, 40, Color.RED), "Ivan");
+                    gamePane.getChildren().add(enemy.getPlayerNode());
+            }
+        });
+    }
+
+    public synchronized void moveEnemy(double x, double y) {
+        javafx.application.Platform.runLater(() -> {
+            enemy.getPlayerNode().setTranslateX(x);
+            enemy.getPlayerNode().setTranslateY(y);
+        });
     }
 }

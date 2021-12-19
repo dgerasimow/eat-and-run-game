@@ -61,6 +61,7 @@ public class ViewManager {
         newGameButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
+                GameViewManager.setGm(new GameViewManager(false));
                 gm = GameViewManager.getGm();
                 rootStage.setScene(gm.getGameScene());
             }
@@ -70,6 +71,14 @@ public class ViewManager {
     private void createConnectToGameButton() {
         GameButton connectToGameButton = new GameButton("CONNECT");
         addMenuButton(connectToGameButton);
+        connectToGameButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                GameViewManager.setGm(new GameViewManager(true));
+                gm = GameViewManager.getGm();
+                rootStage.setScene(gm.getGameScene());
+            }
+        });
     }
 
     private void createInfoButton() {

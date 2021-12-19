@@ -2,12 +2,14 @@ package game.view;
 
 
 import com.google.gson.Gson;
+import game.ConnectedGameController;
 import game.HostGameController;
 import game.client.PlayerClient;
 import game.data.LevelData;
 import game.model.GameLabel;
 import game.view.models.EnemyPlayer;
 import game.view.models.Player;
+import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
@@ -32,25 +34,41 @@ public class GameViewManager {
     private Pane gamePane;
     private ArrayList<Node> platforms = new ArrayList<>();
     private Player player;
-    private EnemyPlayer enemy;
     private GameLabel timer;
     private GameLabel firstPlayerName;
     private GameLabel secondPlayerName;
     private GameLabel firstPlayerScores;
     private GameLabel secondPlayerScores;
-    private static GameViewManager gm = new GameViewManager();
+    private static GameViewManager gm;
     private PlayerClient client;
     private HostGameController hostGameController;
+    private ConnectedGameController connectedGameController;
+
+
 
     public static GameViewManager getGm() {
         return gm;
     }
 
-    public GameViewManager() {
-        initGameContent();
-        hostGameController = new HostGameController(gamePane,platforms, player, timer, firstPlayerScores, keys, gameScene, enemy);
-        hostGameController.startGame();
+    public static void setGm(GameViewManager gm) {
+        GameViewManager.gm = gm;
     }
+
+    public GameViewManager(boolean isConnected) {
+        initGameContent();
+        if (!isConnected) {
+            hostGameController = new HostGameController(gamePane,platforms, player, timer, firstPlayerScores, keys, gameScene, client, secondPlayerScores);
+            hostGameController.startGame();
+        } else {
+            connectedGameController = new ConnectedGameController(gamePane,platforms, player, timer, firstPlayerScores, keys, gameScene, client, secondPlayerScores);
+            connectedGameController.connectToHost();
+        }
+    }
+
+    public PlayerClient getClient() {
+        return client;
+    }
+
     private void initGameContent(){
         client = new PlayerClient(this);
         try {
@@ -91,8 +109,12 @@ public class GameViewManager {
         firstPlayerScores = new GameLabel("0", 60);
         firstPlayerScores.setTranslateX(350);
         firstPlayerScores.setTranslateY(0);
+        secondPlayerScores = new GameLabel("0", 60);
+        secondPlayerScores.setTranslateX(600);
+        secondPlayerScores.setTranslateY(0);
 
         gamePane.getChildren().add(firstPlayerScores);
+        gamePane.getChildren().add(secondPlayerScores);
 
     }
     private void createMap (String[] mapData) {
@@ -127,17 +149,15 @@ public class GameViewManager {
         return gameScene;
     }
 
-    public synchronized void createEnemy() {
-        if (enemy == null) {
-            javafx.application.Platform.runLater(() -> {
-                System.out.println("created Enemy");
-                enemy = new EnemyPlayer(createEntity(500, 200, 40, 40, Color.RED), "Ivan");
-                hostGameController.setEnemy(enemy);
-            });
-        }
+    public HostGameController getHostGameController() {
+        return hostGameController;
     }
 
-    public EnemyPlayer getEnemy() {
-        return enemy;
+    public ConnectedGameController getConnectedGameController() {
+        return connectedGameController;
+    }
+
+    public synchronized void exitGame() {
+        javafx.application.Platform.runLater(Platform::exit);
     }
 }

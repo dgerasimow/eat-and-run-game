@@ -1,5 +1,6 @@
 package game.view.models;
 
+import game.view.GameViewManager;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
 
@@ -21,6 +22,7 @@ public class Player {
     public void jumpPlayer() {
         if (canJump) {
             playerVelocity = playerVelocity.add(0, -30);
+            System.out.println("I JUMPED");
             canJump = false;
         }
     }
@@ -43,6 +45,8 @@ public class Player {
                 }
             }
             playerNode.setTranslateX(playerNode.getTranslateX() + (movingRight ? 1 : -1));
+
+
         }
     }
 
