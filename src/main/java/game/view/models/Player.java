@@ -1,6 +1,5 @@
 package game.view.models;
 
-import game.view.GameViewManager;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
 
@@ -10,13 +9,11 @@ public class Player {
     private Point2D playerVelocity;
     private boolean canJump;
     private Node playerNode;
-    private String name;
 
-    public Player(Node playerNode, String name) {
-        playerVelocity = new Point2D(0,0);
+    public Player(Node playerNode) {
+        playerVelocity = new Point2D(0, 0);
         canJump = true;
-        this.playerNode =  playerNode;
-        this.name = name;
+        this.playerNode = playerNode;
     }
 
     public void jumpPlayer() {
@@ -50,26 +47,6 @@ public class Player {
         }
     }
 
-    public Node getPlayerNode() {
-        return playerNode;
-    }
-
-    public boolean isCanJump() {
-        return canJump;
-    }
-
-    public Point2D getPlayerVelocity() {
-        return playerVelocity;
-    }
-
-    public void setPlayerVelocity(Point2D playerVelocity) {
-        this.playerVelocity = playerVelocity;
-    }
-
-    public void setCanJump(boolean canJump) {
-        this.canJump = canJump;
-    }
-
     public void movePlayerY(int value, ArrayList<Node> platforms) {
         boolean movingDown = value > 0;
 
@@ -92,4 +69,17 @@ public class Player {
             playerNode.setTranslateY(playerNode.getTranslateY() + (movingDown ? 1 : -1));
         }
     }
+
+    public Node getPlayerNode() {
+        return playerNode;
+    }
+
+    public Point2D getPlayerVelocity() {
+        return playerVelocity;
+    }
+
+    public void setPlayerVelocity(Point2D playerVelocity) {
+        this.playerVelocity = playerVelocity;
+    }
+
 }

@@ -4,17 +4,10 @@ import javafx.scene.Node;
 import javafx.scene.shape.Rectangle;
 
 public class EnemyPlayer extends Rectangle {
-    private Node playerNode;
-    private String name;
+    private final Node playerNode;
 
-    public EnemyPlayer(Node playerNode, String name) {
+    public EnemyPlayer(Node playerNode) {
         this.playerNode = playerNode;
-        this.name = name;
-    }
-
-    public synchronized void moveEnemy(double x, double y) {
-        setX(x);
-        setY(y);
     }
 
     public Node getPlayerNode() {

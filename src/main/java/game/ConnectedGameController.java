@@ -10,19 +10,19 @@ import javafx.animation.AnimationTimer;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
+import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Rectangle;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class ConnectedGameController {
 
-    private HashMap<KeyCode, Boolean> keys = new HashMap<>();
+    private HashMap<KeyCode, Boolean> keys;
     private CopyOnWriteArrayList<Food> foodEntities;
     private ArrayList<Node> platforms;
     private Pane gamePane;
@@ -32,16 +32,14 @@ public class ConnectedGameController {
     private Label timerLabel;
     private Label firstPlayerScores;
     private Label secondPlayerScores;
-    private int[] time = {120};
     private boolean isTimeIsUp = false;
     private EndGameSubscene endGameSubscene;
-    private Scene gameScene;
     private EnemyPlayer enemy;
     private PlayerClient client;
     private Gson gson = new Gson();
 
     public ConnectedGameController(Pane gamePane, ArrayList<Node> platforms, Player player, Label timer,
-                                   Label firstPlayerScores, HashMap<KeyCode, Boolean> keys, Scene gameScene, PlayerClient client, Label secondPlayerScores) {
+                                   Label firstPlayerScores, HashMap<KeyCode, Boolean> keys, PlayerClient client, Label secondPlayerScores) {
         this.gamePane = gamePane;
         this.platforms = platforms;
         this.player = player;
@@ -49,13 +47,10 @@ public class ConnectedGameController {
         firstPlayerScore = 0;
         timerLabel = timer;
         this.firstPlayerScores = firstPlayerScores;
-//        endGameSubscene = new EndGameSubscene();
         this.keys = keys;
-        this.gameScene = gameScene;
         this.client = client;
         this.secondPlayerScores = secondPlayerScores;
     }
-
 
 
     public void connectToHost() {
@@ -81,7 +76,7 @@ public class ConnectedGameController {
             @Override
             public void handle(long l) {
                 if (isTimeIsUp) {
-                    gameEnding();
+                    gameEnding(checkWinner());
                     updateTimer.stop();
                     this.stop();
                 }
@@ -91,26 +86,28 @@ public class ConnectedGameController {
 
     }
 
-    private void gameEnding() {
+    private void gameEnding(String winner) {
+        endGameSubscene = new EndGameSubscene(winner);
         endGameSubscene.setLayoutX(285);
         endGameSubscene.setLayoutY(150);
         gamePane.getChildren().add(endGameSubscene);
     }
 
-
-    public synchronized void spawnFood(int foodId, double x, double y) {
-        javafx.application.Platform.runLater(() -> {
-            Food food = new Food(foodId, createEntityWithoutAdding((int) x, (int) y, 20, 20, Color.YELLOW));
-            foodEntities.add(food);
-            gamePane.getChildren().add(food.getFoodNode());
-        });
+    private String checkWinner() {
+        if (firstPlayerScore > secondPlayerScore) {
+            return "Host player";
+        } else if (firstPlayerScore == secondPlayerScore) {
+            return "Friendship";
+        } else {
+            return "Connected player";
+        }
     }
 
-    private Node createEntityWithoutAdding(int x, int y, int w, int h, Color color) {
+    private Node createEntityWithoutAdding(int x, int y, int w, int h, Image image) {
         Rectangle entity = new Rectangle(w, h);
         entity.setTranslateX(x);
         entity.setTranslateY(y);
-        entity.setFill(color);
+        entity.setFill(new ImagePattern(image));
 
         return entity;
     }
@@ -153,7 +150,7 @@ public class ConnectedGameController {
         if (isPressed(KeyCode.A) && player.getPlayerNode().getTranslateX() >= 5) {
             player.movePlayerX(-5, platforms);
         }
-        if (isPressed(KeyCode.D) && player.getPlayerNode().getTranslateX() >= 5 ) {
+        if (isPressed(KeyCode.D) && player.getPlayerNode().getTranslateX() >= 5) {
             player.movePlayerX(5, platforms);
         }
         if (player.getPlayerVelocity().getY() < 10) {
@@ -161,26 +158,18 @@ public class ConnectedGameController {
         }
         player.movePlayerY((int) player.getPlayerVelocity().getY(), platforms);
 
-        HashMap<String,String> message = new HashMap<>();
+        HashMap<String, String> message = new HashMap<>();
         message.put("method", "move");
         message.put("x", Double.toString(player.getPlayerNode().getTranslateX()));
         message.put("y", Double.toString(player.getPlayerNode().getTranslateY()));
         client.sendMessage(gson.toJson(message) + "\n");
     }
 
-    private boolean isPressed(KeyCode key) {
-        return keys.getOrDefault(key, false);
-    }
-
-    public EnemyPlayer getEnemy() {
-        return enemy;
-    }
-
     public synchronized void createEnemy() {
         javafx.application.Platform.runLater(() -> {
             if (enemy == null) {
                 System.out.println("created Enemy");
-                enemy = new EnemyPlayer(createEntityWithoutAdding(500, 200, 40, 40, Color.RED), "Ivan");
+                enemy = new EnemyPlayer(createEntityWithoutAdding(500, 200, 40, 40, new Image("enemy_cat.png")));
                 gamePane.getChildren().add(enemy.getPlayerNode());
             }
         });
@@ -197,5 +186,27 @@ public class ConnectedGameController {
             enemy.getPlayerNode().setTranslateX(x);
             enemy.getPlayerNode().setTranslateY(y);
         });
+    }
+
+    public synchronized void setTimeIsUp() {
+        javafx.application.Platform.runLater(() -> {
+            isTimeIsUp = true;
+        });
+    }
+
+    public synchronized void spawnFood(int foodId, double x, double y) {
+        javafx.application.Platform.runLater(() -> {
+            Food food = new Food(foodId, createEntityWithoutAdding((int) x, (int) y, 20, 20, new Image("food.png")));
+            foodEntities.add(food);
+            gamePane.getChildren().add(food.getFoodNode());
+        });
+    }
+
+    private boolean isPressed(KeyCode key) {
+        return keys.getOrDefault(key, false);
+    }
+
+    public EnemyPlayer getEnemy() {
+        return enemy;
     }
 }

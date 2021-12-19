@@ -14,7 +14,6 @@ import javafx.scene.paint.Color;
 import java.util.HashMap;
 
 public class EndGameSubscene extends SubScene {
-    private static final String FONT_PATH = "src/main/java/game/model/resources/fonts/chalkboy.otf";
     private GameButton exitButton;
     private Label winningLabel;
     private AnchorPane root;
@@ -34,7 +33,7 @@ public class EndGameSubscene extends SubScene {
     }
 
     private void initLabels(String winner) {
-        winningLabel = new GameLabel(winner + " won!", 60);
+        winningLabel = new GameLabel(winner + " won!", 30);
         winningLabel.setTranslateY(100);
         winningLabel.setTranslateX(75);
         root.getChildren().add(winningLabel);
@@ -50,7 +49,6 @@ public class EndGameSubscene extends SubScene {
                 message.put("method", "exit");
                 gm.getClient().sendMessage(gson.toJson(message) + "\n");
                 System.exit(1);
-//                javafx.application.Platform.exit();
             }
         });
         exitButton.setTranslateX(75);

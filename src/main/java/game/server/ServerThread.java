@@ -7,7 +7,6 @@ import java.net.SocketException;
 
 public class ServerThread implements Runnable {
     private final BufferedReader input;
-
     private final BufferedWriter output;
 
     private final Server server;
@@ -27,11 +26,6 @@ public class ServerThread implements Runnable {
     public BufferedWriter getOutput() {
         return output;
     }
-
-    public Server getServer() {
-        return server;
-    }
-
 
     @Override
     public void run() {

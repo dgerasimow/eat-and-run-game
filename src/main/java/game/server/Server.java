@@ -6,9 +6,7 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Server {
@@ -36,11 +34,11 @@ public class Server {
 
     public void sendMessage(String message, ServerThread sender) throws IOException {
         for (ServerThread client : clients) {
-            if (client.equals(sender)){
+            if (client.equals(sender)) {
                 continue;
             }
 
-            client.getOutput().write(message+ "\n");
+            client.getOutput().write(message + "\n");
             client.getOutput().flush();
         }
     }

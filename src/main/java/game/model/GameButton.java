@@ -49,7 +49,7 @@ public class GameButton extends Button {
         setOnMousePressed(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent mouseEvent) {
-                if(mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
+                if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
                     setButtonPressedStyle();
                 }
             }
@@ -58,7 +58,7 @@ public class GameButton extends Button {
         setOnMouseReleased(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent mouseEvent) {
-                if(mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
+                if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
                     setButtonReleasedStyle();
                 }
             }

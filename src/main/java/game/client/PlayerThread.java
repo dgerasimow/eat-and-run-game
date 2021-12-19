@@ -1,7 +1,6 @@
 package game.client;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import game.view.GameViewManager;
 
@@ -10,7 +9,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.HashMap;
 
-public class PlayerThread implements Runnable{
+public class PlayerThread implements Runnable {
     private final BufferedReader input;
     private final BufferedWriter output;
     private final PlayerClient client;
@@ -39,8 +38,9 @@ public class PlayerThread implements Runnable{
                 String message = input.readLine();
                 Gson gson = new Gson();
 
-                if(message != null) {
-                    HashMap<String, String> serverMessage = gson.fromJson(message, new TypeToken<HashMap<String, String>>(){}.getType());
+                if (message != null) {
+                    HashMap<String, String> serverMessage = gson.fromJson(message, new TypeToken<HashMap<String, String>>() {
+                    }.getType());
                     String method = serverMessage.get("method");
                     if (method.equals("create")) {
                         if (gm.getHostGameController() != null && gm.getHostGameController().getEnemy() == null) {
@@ -71,6 +71,8 @@ public class PlayerThread implements Runnable{
                     } else if (method.equals("exit")) {
                         System.out.println("EXITING");
                         gm.exitGame();
+                    } else if (method.equals("endTime")) {
+                        gm.getConnectedGameController().setTimeIsUp();
                     }
                 }
             }

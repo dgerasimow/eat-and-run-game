@@ -26,17 +26,13 @@ public class ViewManager {
     List<GameButton> menuButtons;
 
 
-
     public ViewManager(Stage rootStage) {
         this.rootStage = rootStage;
         this.mainPane = new AnchorPane();
         this.menuScene = new Scene(mainPane, WIDTH, HEIGHT);
         menuButtons = new ArrayList<>();
-        //TODO: needs to be researched
-//        createSubScenes();
         createButtons();
         createBackground();
-//        когда сделаю лого
         createLogo();
 
 
@@ -50,8 +46,6 @@ public class ViewManager {
     private void createButtons() {
         createNewGameButton();
         createConnectToGameButton();
-        createInfoButton();
-        createCreditsButton();
         createExitButton();
     }
 
@@ -81,26 +75,14 @@ public class ViewManager {
         });
     }
 
-    private void createInfoButton() {
-            GameButton infoButton = new GameButton("INFO");
-            addMenuButton(infoButton);
-//TODO: needs to be researched
-
-//            infoButton.setOnAction(new EventHandler<ActionEvent>() {
-//                @Override
-//                public void handle(ActionEvent actionEvent) {
-//                    infoSubScene.moveSubScene();
-//                }
-//            });
-    }
-
-    private void createCreditsButton() {
-        GameButton creditsButton = new GameButton("CREDITS");
-        addMenuButton(creditsButton);
-    }
-
     private void createExitButton() {
         GameButton exitButton = new GameButton("EXIT");
+        exitButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                System.exit(1);
+            }
+        });
         addMenuButton(exitButton);
     }
 
@@ -118,7 +100,7 @@ public class ViewManager {
         mainPane.setBackground(new Background(background));
 
     }
-    
+
     public void createLogo() {
         ImageView logo = new ImageView("game_logo.png");
         logo.setLayoutX(200);

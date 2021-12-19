@@ -1,7 +1,6 @@
 package game.view.models;
 
 import javafx.scene.Node;
-import javafx.scene.shape.Rectangle;
 
 public class Food {
     private int id;
@@ -15,10 +14,6 @@ public class Food {
 
     public int getFoodId() {
         return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 
     public Node getFoodNode() {
