@@ -40,8 +40,8 @@ public class GameViewManager {
     private ConnectedGameController connectedGameController;
 
 
-    public GameViewManager(boolean isConnected) {
-        initGameContent();
+    public GameViewManager(boolean isConnected, String serverIp) {
+        initGameContent(serverIp);
         if (!isConnected) {
             hostGameController = new HostGameController(gamePane, platforms, player, timer, firstPlayerScores, keys, client, secondPlayerScores);
             hostGameController.startGame();
@@ -55,8 +55,8 @@ public class GameViewManager {
         return client;
     }
 
-    private void initGameContent() {
-        client = new PlayerClient(this);
+    private void initGameContent(String serverIp) {
+        client = new PlayerClient(this, serverIp);
         try {
             client.start();
         } catch (IOException e) {

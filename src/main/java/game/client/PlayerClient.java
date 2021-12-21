@@ -10,9 +10,11 @@ public class PlayerClient {
     private Socket socket;
     private PlayerThread gameThread;
     private GameViewManager gm;
+    private String serverIp;
 
-    public PlayerClient(GameViewManager gm) {
+    public PlayerClient(GameViewManager gm, String serverIp) {
         this.gm = gm;
+        this.serverIp = serverIp;
     }
 
     public void sendMessage(String message) {
@@ -25,7 +27,7 @@ public class PlayerClient {
     }
 
     public void start() throws IOException {
-        socket = new Socket("127.0.0.1", 5555);
+        socket = new Socket(serverIp, 5555);
 
         BufferedWriter output = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8));
         BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));

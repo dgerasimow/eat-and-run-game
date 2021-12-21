@@ -17,6 +17,7 @@ public class Server {
 
     public void start() throws IOException {
         socket = new ServerSocket(PORT);
+        System.out.println("Сервер запущен");
 
         while (true) {
             Socket clientSocket = socket.accept();

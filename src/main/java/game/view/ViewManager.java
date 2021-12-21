@@ -4,11 +4,13 @@ import game.model.GameButton;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
+import javafx.scene.control.TextField;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
@@ -20,6 +22,7 @@ public class ViewManager {
     private AnchorPane mainPane;
     private Scene menuScene;
     private Stage rootStage;
+    private TextField ip;
     private GameViewManager gm;
 
 
@@ -34,8 +37,7 @@ public class ViewManager {
         createButtons();
         createBackground();
         createLogo();
-
-
+        createIpField();
     }
 
 
@@ -55,7 +57,7 @@ public class ViewManager {
         newGameButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-                GameViewManager.setGm(new GameViewManager(false));
+                GameViewManager.setGm(new GameViewManager(false, ip.getText()));
                 gm = GameViewManager.getGm();
                 rootStage.setScene(gm.getGameScene());
             }
@@ -68,7 +70,7 @@ public class ViewManager {
         connectToGameButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-                GameViewManager.setGm(new GameViewManager(true));
+                GameViewManager.setGm(new GameViewManager(true, ip.getText()));
                 gm = GameViewManager.getGm();
                 rootStage.setScene(gm.getGameScene());
             }
@@ -86,10 +88,17 @@ public class ViewManager {
         addMenuButton(exitButton);
     }
 
+    private void createIpField() {
+        ip = new TextField();
+        ip.setPromptText("Enter server ip...");
+        ip.setLayoutX(435);
+        ip.setLayoutY(400);
+        mainPane.getChildren().add(ip);
+    }
 
     private void addMenuButton(GameButton button) {
         button.setLayoutX(450);
-        button.setLayoutY(400 + (menuButtons.size() * 80));
+        button.setLayoutY(450 + (menuButtons.size() * 80));
         menuButtons.add(button);
         mainPane.getChildren().add(button);
     }
@@ -104,7 +113,7 @@ public class ViewManager {
     public void createLogo() {
         ImageView logo = new ImageView("game_logo.png");
         logo.setLayoutX(200);
-        logo.setLayoutY(0);
+        logo.setLayoutY(-50);
         logo.setOnMouseEntered(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent mouseEvent) {
